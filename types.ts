@@ -51,5 +51,7 @@ export interface LanguageStrings {
     geminiModalResult: string;
     insertDescription: string;
     close: string;
+    resetQuote: string;
+    resetConfirmation: string;
   };
 }

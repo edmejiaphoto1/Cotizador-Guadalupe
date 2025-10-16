@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Quote, LineItem } from './types';
 import { INITIAL_QUOTE, STRINGS } from './constants';
@@ -8,9 +8,28 @@ import GeminiModal from './components/GeminiModal';
 export type Language = 'es' | 'en';
 
 const App: React.FC = () => {
-  const [quote, setQuote] = useState<Quote>(INITIAL_QUOTE);
+  const [quote, setQuote] = useState<Quote>(() => {
+    try {
+      const savedQuote = localStorage.getItem('quote-data');
+      if (savedQuote) {
+        return JSON.parse(savedQuote);
+      }
+    } catch (error) {
+      console.error("Error reading from localStorage", error);
+    }
+    return INITIAL_QUOTE;
+  });
+  
   const [language, setLanguage] = useState<Language>('es');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('quote-data', JSON.stringify(quote));
+    } catch (error) {
+      console.error("Error saving to localStorage", error);
+    }
+  }, [quote]);
 
   const s = STRINGS[language];
 
@@ -69,6 +88,12 @@ const App: React.FC = () => {
     setQuote(prev => ({ ...prev, projectDescription: text }));
   };
 
+  const handleReset = () => {
+    if (window.confirm(s.resetConfirmation)) {
+      setQuote(INITIAL_QUOTE);
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen p-4 sm:p-6 lg:p-8 print:p-0">
@@ -79,7 +104,14 @@ const App: React.FC = () => {
                 <h1 className="text-3xl font-bold">{s.title}</h1>
                 <p className="text-gray-300 print:text-gray-600">{s.quoteFor}: {quote.clientName}</p>
               </div>
-              <div className="print:hidden">
+              <div className="flex items-center space-x-2 print:hidden">
+                <button
+                  onClick={handleReset}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                  title={s.resetQuote}
+                >
+                  {s.resetQuote}
+                </button>
                 <button
                   onClick={toggleLanguage}
                   className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-300"
@@ -112,7 +144,12 @@ const App: React.FC = () => {
 
             {/* Line Items Table */}
             <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">{s.items}</h2>
+              <div className="flex items-center space-x-3 mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">{s.items}</h2>
+                <span className="bg-gray-200 text-gray-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  {quote.lineItems.length}
+                </span>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
