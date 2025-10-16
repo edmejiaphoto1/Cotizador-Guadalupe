@@ -1,0 +1,5 @@
+{
+  "name": "Generador de Cotizaciones de Proyectos",
+  "description": "Una aplicación para crear, personalizar y gestionar cotizaciones para proyectos de renovación, con la ayuda de la IA de Gemini para generar descripciones de proyectos profesionales.",
+  "requestFramePermissions": []
+}
